@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AB Rides Admin</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #0f172a;
+      color: white;
+      padding: 40px;
+    }
+    h1 { color: #22c55e; }
+    .card {
+      background: #1e293b;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+    button {
+      padding: 10px 20px;
+      border-radius: 8px;
+      border: none;
+      background: #22c55e;
+      font-weight: bold;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    table {
+      width: 100%;
+      margin-top: 20px;
+      border-collapse: collapse;
+    }
+    td, th {
+      border-bottom: 1px solid #334155;
+      padding: 12px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <h1>🚀 AB Rides Admin Dashboard</h1>
+  <div class="card">
+  <h3>Total Signups</h3>
+  <h2 id="count">Loading...</h2>
+</div>
+<div class="card">
+  <button onclick="loadData()">Refresh Data</button>
+  <button onclick="exportCSV()">Export CSV</button>
+  <table id="table">
+    <thead>
+      <tr>
+        <th>Email</th>
+        <th>Type</th>
+        <th>Time</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+<script>
+const API = "https://uodhcmpfefwp37x5y2o3sp2dhu0zxqsi.lambda-url.ap-south-1.on.aws/";
+
+async function loadData() {
+  const res = await fetch(API);
+  const data = await res.json();
+
+  const table = document.querySelector("#table tbody");
+  table.innerHTML = "";
+  document.getElementById("count").innerText = data.length;
+
+  data.forEach(item => {
+    const row = `
+      <tr>
+        <td>${item.email}</td>
+        <td>${item.type}</td>
+        <td>${new Date(item.timestamp).toLocaleString()}</td>
+      </tr>`;
+    table.innerHTML += row;
+  });
+}
+
+function exportCSV() {
+  const rows = [...document.querySelectorAll("table tr")]
+    .map(tr => [...tr.children].map(td => td.innerText).join(","))
+    .join("\n");
+
+  const blob = new Blob([rows]);
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "abrides-users.csv";
+  a.click();
+}
+
+loadData();
+</script>
+</body>
+</html>
